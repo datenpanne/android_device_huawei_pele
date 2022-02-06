@@ -22,9 +22,8 @@
 #include <poll.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <stdlib.h>
 #include <sys/select.h>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <cutils/properties.h>
 
 #include "ProximitySensor.h"
@@ -42,7 +41,6 @@ enum input_device_name {
     GENERIC_PSENSOR = 0,
     LEGACY_PSENSOR,
     CM36283_PS,
-    AP3426_PS,
     SUPPORTED_PSENSOR_COUNT,
 };
 
@@ -50,7 +48,6 @@ static const char *data_device_name[SUPPORTED_PSENSOR_COUNT] = {
    [GENERIC_PSENSOR] = "proximity",
     [LEGACY_PSENSOR] = "proximity",
         [CM36283_PS] = "cm36283-ps",
-         [AP3426_PS] = "ap3426-ps",
 };
 
 static const char *input_sysfs_path_list[SUPPORTED_PSENSOR_COUNT] = {
@@ -58,14 +55,12 @@ static const char *input_sysfs_path_list[SUPPORTED_PSENSOR_COUNT] = {
    [GENERIC_PSENSOR] = "/sys/class/input/%s/device/",
     [LEGACY_PSENSOR] = "/sys/class/input/%s/device/",
         [CM36283_PS] = "/sys/class/input/%s/device/",
-	 [AP3426_PS] = "/sys/class/input/%s/device/",
 };
 
 static const char *input_sysfs_enable_list[SUPPORTED_PSENSOR_COUNT] = {
    [GENERIC_PSENSOR] = "enable",
     [LEGACY_PSENSOR] = "enable",
         [CM36283_PS] = "enable",
-         [AP3426_PS] = "enable",
 };
 
 

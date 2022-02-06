@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #set -e
-export DEVICE=federer
+export DEVICE=pele
 export VENDOR=huawei
 
 if [ $# -eq 4 ]; then

@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_TAG "android.hardware.biometrics.fingerprint@1.0-service.pele"
-#define LOG_VERBOSE "android.hardware.biometrics.fingerprint@1.0-service.pele"
+#define LOG_TAG "android.hardware.biometrics.fingerprint@2.0-service.pele"
+#define LOG_VERBOSE "android.hardware.biometrics.fingerprint@2.0-service.pele"
 
 #include <hardware/hw_auth_token.h>
 
@@ -22,9 +22,7 @@
 #include <hardware/fingerprint.h>
 #include "BiometricsFingerprint.h"
 
-#include <cstdlib>
 #include <inttypes.h>
-#include <thread>
 #include <unistd.h>
 
 namespace android {
@@ -35,7 +33,7 @@ namespace V2_1 {
 namespace implementation {
 
 // Supported fingerprint HAL version
-static const uint16_t kVersion = HARDWARE_MODULE_API_VERSION(1, 0);
+static const uint16_t kVersion = HARDWARE_MODULE_API_VERSION(2, 0);
 
 using RequestStatus =
         android::hardware::biometrics::fingerprint::V2_1::RequestStatus;
@@ -46,11 +44,7 @@ BiometricsFingerprint::BiometricsFingerprint() : mClientCallback(nullptr), mDevi
     sInstance = this; // keep track of the most recent instance
     mDevice = openHal();
     if (!mDevice) {
-        using namespace std::chrono_literals;
-
-        ALOGE("Can't open HAL module. Exiting process...");
-        std::this_thread::sleep_for(500ms);
-        std::exit(EXIT_FAILURE);
+        ALOGE("Can't open HAL module");
     }
 }
 
@@ -151,6 +145,7 @@ FingerprintAcquiredInfo BiometricsFingerprint::VendorAcquiredFilter(
 
 Return<uint64_t> BiometricsFingerprint::setNotify(
         const sp<IBiometricsFingerprintClientCallback>& clientCallback) {
+    std::lock_guard<std::mutex> lock(mClientCallbackMutex);
     mClientCallback = clientCallback;
     // This is here because HAL 2.1 doesn't have a way to propagate a
     // unique token for its driver. Subsequent versions should send a unique
@@ -179,7 +174,14 @@ Return<uint64_t> BiometricsFingerprint::getAuthenticatorId() {
 }
 
 Return<RequestStatus> BiometricsFingerprint::cancel() {
-    return ErrorFilter(mDevice->cancel(mDevice));
+    int ret = mDevice->cancel(mDevice);
+    if (ret == 0) {
+        fingerprint_msg_t msg{};
+        msg.type = FINGERPRINT_ERROR;
+        msg.data.error = FINGERPRINT_ERROR_CANCELED;
+        sInstance->notify(&msg);
+    }
+    return ErrorFilter(ret);
 }
 
 #define MAX_FINGERPRINTS 100
@@ -287,6 +289,7 @@ fingerprint_device_t* BiometricsFingerprint::openHal() {
 void BiometricsFingerprint::notify(const fingerprint_msg_t *msg) {
     BiometricsFingerprint* thisPtr = static_cast<BiometricsFingerprint*>(
             BiometricsFingerprint::getInstance());
+    std::lock_guard<std::mutex> lock(thisPtr->mClientCallbackMutex);
     if (thisPtr == nullptr || thisPtr->mClientCallback == nullptr) {
         ALOGE("Receiving callbacks before the client callback is registered.");
         return;

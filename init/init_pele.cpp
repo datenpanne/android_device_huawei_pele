@@ -30,6 +30,8 @@
 
 #include <android-base/logging.h>
 #include <android-base/properties.h>
+#include <android-base/file.h>
+#include <android-base/strings.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -45,7 +47,7 @@ typedef struct {
     string description;
     string fingerprint;
     string default_network;
-    bool is_cdma;
+    bool is_wifi;
 } match_t;
 
 void property_override(char const prop[], char const value[])
@@ -74,6 +76,13 @@ static match_t matches[] = {
         "9",
         false
     },
+    {
+        "FDR-A01W",
+        "FDR-user 5.1.1 HuaweiMediaPad C233B011 release-keys",
+        "HUAWEI/FDR/HWFDR:5.1.1/HuaweiMediaPad/FDR-A01wC233B011:user/release-keys",
+        "0",
+        true
+    },
 };
 
 static const int n_matches = sizeof(matches) / sizeof(matches[0]);
@@ -90,14 +99,9 @@ static bool contains(string str, string substr)
 
 void vendor_load_properties()
 {
-    string platform;
     string model;
     string hwsim;
     match_t *match;
-
-    platform = GetProperty("ro.board.platform", "");
-    if (platform != ANDROID_TARGET)
-        return;
 
     ifstream app_info("/proc/app_info");
     if (app_info.is_open()) {
@@ -126,8 +130,8 @@ void vendor_load_properties()
     property_set("ro.vendor.product.name", match->model);
     property_set("ro.vendor.build.fingerprint", match->fingerprint);
 
-    if (match->is_cdma) {
-        property_set("telephony.lteOnCdmaDevice", "1");
+    if (match->is_wifi) {
+        property_set("ro.radio.noril" , "yes");
     }
 
     // Fix single sim variant based on property set by the bootloader

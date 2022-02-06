@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "android.hardware.biometrics.fingerprint@1.0-service.pele"
+#define LOG_TAG "android.hardware.biometrics.fingerprint@2.1-service.oneplus2"
 
 #include <android/log.h>
 #include <hidl/HidlSupport.h>
 #include <hidl/HidlTransportSupport.h>
 #include <android/hardware/biometrics/fingerprint/2.1/IBiometricsFingerprint.h>
 #include <android/hardware/biometrics/fingerprint/2.1/types.h>
-#include <cstring>
 #include "BiometricsFingerprint.h"
 
 using android::hardware::biometrics::fingerprint::V2_1::IBiometricsFingerprint;
@@ -30,27 +29,15 @@ using android::hardware::configureRpcThreadpool;
 using android::hardware::joinRpcThreadpool;
 using android::sp;
 
-static void setProcessTitle(char* currentTitle, const char* newTitle) {
-    auto currentLength = std::strlen(currentTitle);
-    auto newLength = std::strlen(newTitle);
-
-    if (currentLength < newLength) {
-        ALOGE("Cannot set new process title");
-        return;
-    }
-
-    std::memset(currentTitle, 0, currentLength);
-    std::memcpy(currentTitle, newTitle, newLength);
-}
-
-int main(int, char** argv) {
-    setProcessTitle(argv[0], "/system/bin/fingerprintd");
+int main() {
     android::sp<IBiometricsFingerprint> bio = BiometricsFingerprint::getInstance();
 
     configureRpcThreadpool(1, true /*callerWillJoin*/);
 
     if (bio != nullptr) {
-        bio->registerAsService();
+        if (::android::OK != bio->registerAsService()) {
+            return 1;
+        }
     } else {
         ALOGE("Can't create instance of BiometricsFingerprint, nullptr");
     }

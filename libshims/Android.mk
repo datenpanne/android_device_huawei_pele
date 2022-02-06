@@ -1,4 +1,4 @@
-# Copyright (C) 2017 The LineageOS Project
+# Copyright (C) 2015 The CyanogenMod Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,10 +15,15 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := hw_cutils.c logs.c
-LOCAL_MODULE := libshim_cutils
+LOCAL_C_INCLUDES := \
+    external/icu/libandroidicu \
+    external/icu/libandroidicu/include
+
+LOCAL_SRC_FILES := icu55.c
+APEX_MODULE_LIBS := libicuuc libicui18n
+LOCAL_MODULE := libshim_signinfolistener
 LOCAL_MODULE_TAGS := optional
-LOCAL_VENDOR_MODULE := true
+LOCAL_MULTILIB := 32
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -29,37 +34,8 @@ LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_SRC_FILES := icu55.c
-LOCAL_SHARED_LIBRARIES := libicuuc libicui18n
-LOCAL_MODULE := libshim_signinfolistener
-LOCAL_MODULE_TAGS := optional
-LOCAL_MULTILIB := 32
-include $(BUILD_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
 LOCAL_SRC_FILES := atomic.cpp
 LOCAL_MODULE := libshim_atomic
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 include $(BUILD_SHARED_LIBRARY)
 
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := hw_ril.c
-LOCAL_SHARED_LIBRARIES := libbinder
-LOCAL_MODULE := libshim_hwril
-LOCAL_MODULE_TAGS := optional
-LOCAL_MULTILIB := 64
-include $(BUILD_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := \
-    flp/flp.c
-LOCAL_MODULE := libshims_flp
-LOCAL_MODULE_TAGS := optional
-include $(BUILD_SHARED_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_SRC_FILES := \
-    get_process_name/get_process_name.c
-LOCAL_MODULE := libshims_get_process_name
-LOCAL_MODULE_TAGS := optional
-include $(BUILD_SHARED_LIBRARY)

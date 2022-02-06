@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/select.h>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <cutils/properties.h>
 
 #include "sensors.h"
@@ -37,7 +37,6 @@ enum input_device_name {
 	LIGHTSENSOR_LEVEL,
 	CM36283_LS,
 	STK3x1x_LS,
-	AP3426_ALS,
 	SUPPORTED_LSENSOR_COUNT,
 };
 
@@ -50,7 +49,6 @@ static const char *data_device_name[SUPPORTED_LSENSOR_COUNT] = {
 	[GENERIC_LS] = "light",
 	[LIGHTSENSOR_LEVEL] = "lightsensor-level",
 	[CM36283_LS] = "cm36283-ls",
-	[AP3426_ALS] = "ap3426-ls",
 	[STK3x1x_LS] = "stk3x1x-ls",
 };
 
@@ -59,7 +57,6 @@ static const char *input_sysfs_path_list[SUPPORTED_LSENSOR_COUNT] = {
 	[GENERIC_LS] = "/sys/class/input/%s/device",
 	[LIGHTSENSOR_LEVEL] = "/sys/class/input/%s/device/",
 	[CM36283_LS] = "/sys/class/input/%s/device/",
-	[AP3426_ALS] = "/sys/class/input/%s/device/",
 	[STK3x1x_LS] = "/sys/class/input/%s/device/",
 };
 
@@ -67,7 +64,6 @@ static const char *input_sysfs_enable_list[SUPPORTED_LSENSOR_COUNT] = {
 	[GENERIC_LS] = "enable",
 	[LIGHTSENSOR_LEVEL] = "enable",
 	[CM36283_LS] = "enable",
-	[AP3426_ALS] = "enable",
 	[STK3x1x_LS] = "enable",
 };
 
@@ -75,7 +71,6 @@ static const int input_report_type[SUPPORTED_LSENSOR_COUNT] = {
 	[GENERIC_LS] = TYPE_LUX,
 	[LIGHTSENSOR_LEVEL] = TYPE_ADC,
 	[CM36283_LS] = TYPE_LUX,
-	[AP3426_ALS] = TYPE_LUX,
 	[STK3x1x_LS] = TYPE_LUX,
 };
 

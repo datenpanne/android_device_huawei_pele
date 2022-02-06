@@ -18,11 +18,8 @@
 
 set -e
 
-# Required!
 DEVICE=pele
 VENDOR=huawei
-
-INITIAL_COPYRIGHT_YEAR=2019
 
 # Load extract_utils and do some sanity checks
 MY_DIR="${BASH_SOURCE%/*}"
@@ -37,14 +34,30 @@ if [ ! -f "$HELPER" ]; then
 fi
 . "$HELPER"
 
+# Default to sanitizing the vendor folder before extraction
+CLEAN_VENDOR=true
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -n | --no-cleanup )     CLEAN_VENDOR=false
+                                ;;
+        -s | --section )        shift
+                                SECTION=$1
+                                CLEAN_VENDOR=false
+                                ;;
+        * )                     SRC=$1
+                                ;;
+    esac
+    shift
+done
+
+if [ -z "$SRC" ]; then
+    SRC=adb
+fi
+
 # Initialize the helper
-setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT"
+setup_vendor "$DEVICE" "$VENDOR" "$LINEAGE_ROOT" false "$CLEAN_VENDOR"
 
-# Copyright headers and guards
-write_headers
+extract "$MY_DIR"/proprietary-files.txt "$SRC" "$SECTION"
 
-# The blobs
-write_makefiles "$MY_DIR"/proprietary-files.txt
-
-# Finish
-write_footers
+"$MY_DIR"/setup-makefiles.sh
